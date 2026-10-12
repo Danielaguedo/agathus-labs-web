@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Design tokens — the only colours, radii and fonts the project may use.
+   Resetting the default scales means `bg-blue-600`, `rounded-lg` or
+   `shadow-md` simply do not exist. Keep in sync with CLAUDE.md. */
+@theme {
+  --color-*: initial;
+  /* 60% — dark industrial void */
+  --color-void: #0b0d10;
+  --color-carbon: #12151a;
+  --color-steel: #232a33;
+  --color-steel-light: #3a444f;
+  /* 30% — clinical white + surgical green */
+  --color-clinical: #f1f5f4;
+  --color-muted: #939ca8;
+  --color-surgical: #34d399;
+  /* 10% — violet neon, drawn flat (no glow) */
+  --color-neon: #a78bfa;
+  --color-neon-deep: #7c3aed;
+
+  --radius-*: initial;
+  --radius-sm: 2px;
+
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
+
+  --font-sans: var(--font-display), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-data), ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  --animate-scan: scan 5s linear infinite;
+  @keyframes scan {
+    from { transform: translateY(0); }
+    to { transform: translateY(var(--scan-distance, 100%)); }
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-void);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  ::selection {
+    background-color: var(--color-neon-deep);
+    color: var(--color-clinical);
+  }
+}
+
+/* Chamfered corners, buttons only. A hairline "border" is two nested
+   .chamfer boxes: outer = line colour + p-px, inner = surface. */
+@utility chamfer {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+/* Reveals are driven by Framer Motion (components/Reveal.tsx), which writes
+   the hidden state inline. Reduced motion shows everything at rest; the
+   no-JS equivalent lives in a <noscript> block in app/layout.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    clip-path: none !important;
+    transform: none !important;
+  }
+}

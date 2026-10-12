@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="es" class="scroll-smooth bg-gray-900 motion-reduce:scroll-auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agathus Labs — Precisión digital. Manufactura real.</title>
+  <meta name="description" content="Agathus Labs: laboratorio de manufactura digital y bioingeniería en Arequipa, Perú. Modelos anatómicos 3D desde DICOM, diseño CAD y prototipado, tarjetas corporativas NFC.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+
+  <script>
+    // Reveal styles only apply under .js, so content stays visible without JS.
+    if ('IntersectionObserver' in window) document.documentElement.classList.add('js');
+  </script>
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    // Safety net for CLAUDE.md: no shadows, 0–2px radius.
+    tailwind.config = {
+      theme: {
+        borderRadius: { none: '0', sm: '2px', DEFAULT: '2px' },
+        boxShadow: { none: 'none', DEFAULT: 'none' },
+        dropShadow: { none: 'none', DEFAULT: 'none' },
+        extend: {
+          fontFamily: {
+            // sans = display face, headings only; everything else is mono.
+            sans: ['"Space Grotesk"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'ui-monospace', '"Cascadia Mono"', 'Consolas', 'Menlo', 'monospace'],
+          },
+          // PhotoSlot ratios: aspect-4/3, aspect-16/9, aspect-4/5
+          aspectRatio: { '4/3': '4 / 3', '16/9': '16 / 9', '4/5': '4 / 5' },
+          transitionTimingFunction: {
+            out: 'cubic-bezier(0.23, 1, 0.32, 1)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Chamfered corners, buttons only. A hairline "border" is two nested
+       .chamfer boxes: outer = line colour + p-px, inner = surface. */
+    .chamfer {
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    }
+
+    /* "Susurro" reveals. The observer at the end of <body> sets [data-visible]
+       and a per-batch --d delay; CSS does the rest.
+         data-reveal="wipe" — clip-path wipe with an 8px lift
+         data-reveal="rule" — scaleX on a 1px filete
+       Never put data-reveal on a .chamfer element: both use clip-path. */
+    @media (prefers-reduced-motion: no-preference) {
+      /* Hidden with opacity, not clip-path: a clipped target reports an
+         intersection ratio of 0 and the observer would never fire. The clip
+         only exists inside the keyframes (and during the stagger delay). */
+      .js [data-reveal] {
+        opacity: 0;
+      }
+      .js [data-reveal="wipe"][data-visible] {
+        opacity: 1;
+        animation: wipe 300ms cubic-bezier(0.23, 1, 0.32, 1) var(--d, 0ms) both;
+      }
+      .js [data-reveal="rule"][data-visible] {
+        opacity: 1;
+        transform-origin: left;
+        animation: rule 300ms cubic-bezier(0.23, 1, 0.32, 1) var(--d, 0ms) both;
+      }
+      /* Negative end inset keeps focus outlines of children unclipped. */
+      @keyframes wipe {
+        from { clip-path: inset(0 0 100% 0); transform: translateY(8px); }
+        to { clip-path: inset(-16px); transform: none; }
+      }
+      @keyframes rule {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-900 font-mono text-gray-100 antialiased selection:bg-blue-600 selection:text-white">
+
+  <a href="#main" class="sr-only text-xs uppercase tracking-widest focus-visible:not-sr-only focus-visible:absolute focus-visible:left-6 focus-visible:top-2 focus-visible:z-10 focus-visible:bg-blue-600 focus-visible:px-4 focus-visible:py-3 focus-visible:text-white">
+    Saltar al contenido
+  </a>
+
+  <header class="border-b border-gray-800">
+    <div class="mx-auto grid max-w-screen-2xl grid-cols-12 items-center gap-x-8 px-6 py-6">
+
+      <a href="#inicio" aria-label="Agathus Labs — inicio" class="col-span-6 justify-self-start text-gray-100 outline-offset-4 transition-colors duration-150 ease-out hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600 lg:col-span-2">
+        <!-- Logo: ágata en corte sagital. Mitad izquierda = bandas concéntricas;
+             mitad derecha = cortes horizontales (capas FDM / slices DICOM);
+             núcleo en cobalto. -->
+        <svg class="h-24 w-auto" viewBox="0 0 160 112" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="logo-l"><rect x="0" y="0" width="78" height="60"/></clipPath>
+            <clipPath id="logo-r"><rect x="82" y="0" width="78" height="60"/></clipPath>
+            <clipPath id="logo-tri"><polygon points="80,2 112,58 48,58"/></clipPath>
+          </defs>
+          <g clip-path="url(#logo-l)" fill="none" stroke-width="1">
+            <polygon points="80,2 112,58 48,58" stroke="#9ca3af" vector-effect="non-scaling-stroke"/>
+            <polygon points="80,12.5 103,52.8 57,52.8" stroke="#6b7280" vector-effect="non-scaling-stroke"/>
+            <polygon points="80,22.9 94.1,47.6 65.9,47.6" stroke="#4b5563" vector-effect="non-scaling-stroke"/>
+            <polygon points="80,31.9 86.4,43.1 73.6,43.1" fill="#2563eb"/>
+          </g>
+          <g clip-path="url(#logo-r)">
+            <g clip-path="url(#logo-tri)" fill="none" stroke="#4b5563" stroke-width="1">
+              <path d="M80 16H112M80 22H112M80 28H112M80 34H112M80 40H112M80 46H112M80 52H112" vector-effect="non-scaling-stroke"/>
+            </g>
+            <polygon points="80,2 112,58 48,58" fill="none" stroke="#9ca3af" stroke-width="1" vector-effect="non-scaling-stroke"/>
+            <polygon points="80,31.9 86.4,43.1 73.6,43.1" fill="#2563eb"/>
+          </g>
+          <text x="83" y="86" text-anchor="middle" fill="currentColor" font-family="'Space Grotesk', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="6">AGATHUS</text>
+          <text x="82" y="104" text-anchor="middle" fill="#9ca3af" font-family="'IBM Plex Mono', ui-monospace, Consolas, monospace" font-size="10" letter-spacing="4">labs</text>
+        </svg>
+      </a>
+
+      <p class="hidden text-xs uppercase tracking-widest text-gray-400 lg:col-span-6 lg:block">
+        Manufactura digital / Bioingeniería
+      </p>
+
+      <nav aria-label="Principal" class="col-span-6 flex items-center justify-end gap-8 text-xs uppercase tracking-widest lg:col-span-4">
+        <a href="#divisiones" class="hidden h-10 items-center text-gray-400 outline-offset-4 transition-colors duration-150 ease-out hover:text-gray-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600 sm:flex">
+          Divisiones
+        </a>
+        <a href="#contacto" class="group block outline-offset-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600 motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.98]">
+          <span class="chamfer block bg-gray-700 p-px transition-colors duration-150 ease-out group-hover:bg-gray-400">
+            <span class="chamfer flex h-10 items-center bg-gray-900 px-6 text-gray-100">Cotizar</span>
+          </span>
+        </a>
+      </nav>
+
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- Hero — 8/4: titular a la izquierda, índice 01–04 a la derecha -->
+    <section id="inicio" aria-labelledby="hero-title">
+      <div class="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-8 px-6 py-24 lg:py-32">
+
+        <div class="col-span-12 lg:col-span-8">
+          <p data-reveal="wipe" class="text-xs uppercase tracking-widest text-gray-400">
+            Digital Precision. Real Manufacturing.
+          </p>
+          <h1 id="hero-title" data-reveal="wipe" class="mt-8 break-words font-sans text-5xl font-bold leading-none tracking-tight text-gray-100 sm:text-7xl lg:text-8xl">
+            Precisión digital.<br>
+            <span class="text-gray-400">Manufactura real.</span>
+          </h1>
+          <p data-reveal="wipe" class="mt-12 max-w-xl text-sm leading-relaxed text-gray-400">
+            Convertimos archivos en objetos: de una tomografía a un modelo anatómico, de un diseño CAD a una pieza mecánica que funciona.
+          </p>
+          <div data-reveal="wipe" class="mt-12 flex">
+            <a href="#contacto" class="group block outline-offset-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600 motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.98]">
+              <span class="chamfer flex h-14 items-center gap-4 bg-blue-600 px-8 text-xs font-medium uppercase tracking-widest text-white transition-colors duration-150 ease-out group-hover:bg-blue-500">
+                Cotizar Proyecto
+                <span aria-hidden="true">&rarr;</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <nav aria-label="Índice" class="col-span-12 mt-24 flex flex-col justify-end text-xs uppercase tracking-widest lg:col-span-4 lg:mt-0">
+          <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+          <ol>
+            <li>
+              <a href="#biomedica" class="flex h-14 items-center gap-6 text-gray-400 outline-offset-0 transition-colors duration-150 ease-out hover:text-gray-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600">
+                <span class="text-blue-500">01</span>
+                <span class="text-gray-100">Biomédica</span>
+                <span class="ml-auto">DICOM</span>
+              </a>
+              <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+            </li>
+            <li>
+              <a href="#ingenieria" class="flex h-14 items-center gap-6 text-gray-400 outline-offset-0 transition-colors duration-150 ease-out hover:text-gray-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600">
+                <span class="text-blue-500">02</span>
+                <span class="text-gray-100">Ingeniería</span>
+                <span class="ml-auto">CAD</span>
+              </a>
+              <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+            </li>
+            <li>
+              <a href="#smart" class="flex h-14 items-center gap-6 text-gray-400 outline-offset-0 transition-colors duration-150 ease-out hover:text-gray-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600">
+                <span class="text-blue-500">03</span>
+                <span class="text-gray-100">Smart</span>
+                <span class="ml-auto">NFC</span>
+              </a>
+              <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+            </li>
+            <li>
+              <a href="#contacto" class="flex h-14 items-center gap-6 text-gray-400 outline-offset-0 transition-colors duration-150 ease-out hover:text-gray-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-blue-600">
+                <span class="text-blue-500">04</span>
+                <span class="text-gray-100">Cotización</span>
+                <span class="ml-auto">Arequipa</span>
+              </a>
+              <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+            </li>
+          </ol>
+        </nav>
+
+      </div>
+    </section>
+
+    <!--
+      PhotoSlot — marcador de fotografía pendiente.
+        <figure data-photo-slot="PS-nn">
+          <div data-reveal="wipe" role="img" class="aspect-{4/3|16/9|4/5} border …">   ← marco con proporción fija
+          <figcaption>                                                                 ← Fig. nn + descripción de la toma
+      Al recibir la foto: reemplazar el <div role="img"> por
+        <img data-reveal="wipe" src="…" alt="…" class="aspect-… w-full border border-gray-800 object-cover">
+      y conservar el <figcaption>.
+    -->
+
+    <section id="divisiones" aria-labelledby="divisiones-title">
+      <div class="mx-auto max-w-screen-2xl px-6">
+
+        <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+        <div class="grid grid-cols-12 gap-x-8 py-24 lg:py-32">
+          <p data-reveal="wipe" class="col-span-12 text-xs uppercase tracking-widest text-gray-400 lg:col-span-2">
+            Divisiones
+          </p>
+          <h2 id="divisiones-title" data-reveal="wipe" class="col-span-12 mt-6 font-sans text-4xl font-bold leading-tight tracking-tight text-gray-100 sm:text-6xl lg:col-span-7 lg:mt-0">
+            Tres líneas de trabajo. Un mismo laboratorio.
+          </h2>
+        </div>
+
+        <!-- 01 — 2 / 5 / 5 -->
+        <article id="biomedica" aria-labelledby="biomedica-title">
+          <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+          <div class="grid grid-cols-12 gap-x-8 gap-y-12 py-24 lg:py-32">
+            <div data-reveal="wipe" class="col-span-12 lg:col-span-2">
+              <p class="text-6xl leading-none text-blue-600" aria-hidden="true">01</p>
+              <p class="mt-6 text-xs uppercase tracking-widest text-gray-400">B2B / Cirujanos</p>
+            </div>
+            <div class="col-span-12 lg:col-span-5">
+              <h3 id="biomedica-title" data-reveal="wipe" class="break-words font-sans text-4xl font-bold leading-tight tracking-tight text-gray-100 sm:text-5xl">División Biomédica</h3>
+              <p data-reveal="wipe" class="mt-8 max-w-md text-sm leading-relaxed text-gray-400">
+                Transformamos estudios DICOM en modelos anatómicos 3D. El cirujano recibe la anatomía de su paciente como un objeto físico que puede sostener, medir y estudiar antes de operar.
+              </p>
+              <dl data-reveal="wipe" class="mt-16 max-w-md text-xs uppercase tracking-widest">
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Entrada</dt>
+                  <dd class="col-span-2 text-gray-100">Estudio DICOM</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Proceso</dt>
+                  <dd class="col-span-2 text-gray-100">Reconstrucción 3D</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-y border-gray-800 py-4">
+                  <dt class="text-gray-400">Salida</dt>
+                  <dd class="col-span-2 text-gray-100">Modelo anatómico 3D</dd>
+                </div>
+              </dl>
+            </div>
+            <figure data-photo-slot="PS-01" class="col-span-12 lg:col-span-5">
+              <div data-reveal="wipe" role="img" aria-label="Fotografía pendiente: modelo anatómico impreso en 3D junto al estudio DICOM de origen" class="relative aspect-4/3 border border-gray-800 bg-gray-950">
+                <span class="absolute left-6 top-6 text-xs uppercase tracking-widest text-gray-400">PS-01</span>
+                <span class="absolute bottom-6 right-6 text-xs uppercase tracking-widest text-gray-400">4:3 / Foto pendiente</span>
+              </div>
+              <figcaption data-reveal="wipe" class="mt-4 flex gap-4 text-xs leading-relaxed text-gray-400">
+                <span class="shrink-0 uppercase tracking-widest text-gray-100">Fig. 01</span>
+                <span>Modelo anatómico impreso en 3D junto al estudio DICOM de origen.</span>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 02 — 2 / 6 / 4 -->
+        <article id="ingenieria" aria-labelledby="ingenieria-title">
+          <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+          <div class="grid grid-cols-12 gap-x-8 gap-y-12 py-24 lg:py-32">
+            <div data-reveal="wipe" class="col-span-12 lg:col-span-2">
+              <p class="text-6xl leading-none text-blue-600" aria-hidden="true">02</p>
+              <p class="mt-6 text-xs uppercase tracking-widest text-gray-400">Industria</p>
+            </div>
+            <figure data-photo-slot="PS-02" class="order-last col-span-12 lg:order-none lg:col-span-6">
+              <div data-reveal="wipe" role="img" aria-label="Fotografía pendiente: pieza mecánica funcional montada, con su modelo CAD en pantalla" class="relative aspect-16/9 border border-gray-800 bg-gray-950">
+                <span class="absolute left-6 top-6 text-xs uppercase tracking-widest text-gray-400">PS-02</span>
+                <span class="absolute bottom-6 right-6 text-xs uppercase tracking-widest text-gray-400">16:9 / Foto pendiente</span>
+              </div>
+              <figcaption data-reveal="wipe" class="mt-4 flex gap-4 text-xs leading-relaxed text-gray-400">
+                <span class="shrink-0 uppercase tracking-widest text-gray-100">Fig. 02</span>
+                <span>Pieza mecánica funcional montada, con su modelo CAD en pantalla.</span>
+              </figcaption>
+            </figure>
+            <div class="col-span-12 lg:col-span-4">
+              <h3 id="ingenieria-title" data-reveal="wipe" class="break-words font-sans text-4xl font-bold leading-tight tracking-tight text-gray-100 sm:text-5xl">Ingeniería &amp; Prototipado</h3>
+              <p data-reveal="wipe" class="mt-8 max-w-md text-sm leading-relaxed text-gray-400">
+                Diseño CAD y fabricación de piezas mecánicas funcionales. Prototipos hechos para montarse, moverse y trabajar, no para quedarse en una vitrina.
+              </p>
+              <dl data-reveal="wipe" class="mt-16 max-w-md text-xs uppercase tracking-widest">
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Entrada</dt>
+                  <dd class="col-span-2 text-gray-100">Idea o requerimiento</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Proceso</dt>
+                  <dd class="col-span-2 text-gray-100">Diseño CAD</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-y border-gray-800 py-4">
+                  <dt class="text-gray-400">Salida</dt>
+                  <dd class="col-span-2 text-gray-100">Pieza mecánica funcional</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <!-- 03 — 2 / 7 / 3 -->
+        <article id="smart" aria-labelledby="smart-title">
+          <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+          <div class="grid grid-cols-12 gap-x-8 gap-y-12 py-24 lg:py-32">
+            <div data-reveal="wipe" class="col-span-12 lg:col-span-2">
+              <p class="text-6xl leading-none text-blue-600" aria-hidden="true">03</p>
+              <p class="mt-6 text-xs uppercase tracking-widest text-gray-400">Empresas</p>
+            </div>
+            <div class="col-span-12 lg:col-span-7">
+              <h3 id="smart-title" data-reveal="wipe" class="break-words font-sans text-4xl font-bold leading-tight tracking-tight text-gray-100 sm:text-5xl">Integración Smart</h3>
+              <p data-reveal="wipe" class="mt-8 max-w-md text-sm leading-relaxed text-gray-400">
+                Tarjetas corporativas impresas en 3D con tecnología NFC. Se acerca al teléfono y entrega el contacto.
+              </p>
+              <dl data-reveal="wipe" class="mt-16 max-w-md text-xs uppercase tracking-widest">
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Entrada</dt>
+                  <dd class="col-span-2 text-gray-100">Identidad corporativa</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+                  <dt class="text-gray-400">Proceso</dt>
+                  <dd class="col-span-2 text-gray-100">Impresión 3D + NFC</dd>
+                </div>
+                <div class="grid grid-cols-3 gap-4 border-y border-gray-800 py-4">
+                  <dt class="text-gray-400">Salida</dt>
+                  <dd class="col-span-2 text-gray-100">Tarjeta NFC</dd>
+                </div>
+              </dl>
+            </div>
+            <figure data-photo-slot="PS-03" class="col-span-8 lg:col-span-3">
+              <div data-reveal="wipe" role="img" aria-label="Fotografía pendiente: tarjeta corporativa NFC impresa en 3D acercándose a un teléfono" class="relative aspect-4/5 border border-gray-800 bg-gray-950">
+                <span class="absolute left-6 top-6 text-xs uppercase tracking-widest text-gray-400">PS-03</span>
+                <span class="absolute bottom-6 right-6 text-xs uppercase tracking-widest text-gray-400">4:5 / Pendiente</span>
+              </div>
+              <figcaption data-reveal="wipe" class="mt-4 text-xs leading-relaxed text-gray-400">
+                <span class="block uppercase tracking-widest text-gray-100">Fig. 03</span>
+                <span class="mt-2 block">Tarjeta corporativa NFC impresa en 3D acercándose a un teléfono.</span>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 04 — 2 / 6 / 4 -->
+    <section id="contacto" aria-labelledby="contacto-title" class="bg-gray-950">
+      <div class="mx-auto max-w-screen-2xl px-6">
+        <div data-reveal="rule" aria-hidden="true" class="h-px bg-gray-800"></div>
+        <div class="grid grid-cols-12 gap-x-8 gap-y-12 py-24 lg:py-32">
+          <div data-reveal="wipe" class="col-span-12 lg:col-span-2">
+            <p class="text-6xl leading-none text-blue-600" aria-hidden="true">04</p>
+            <p class="mt-6 text-xs uppercase tracking-widest text-gray-400">Cotización</p>
+          </div>
+          <div class="col-span-12 lg:col-span-6">
+            <h2 id="contacto-title" data-reveal="wipe" class="break-words font-sans text-4xl font-bold leading-tight tracking-tight text-gray-100 sm:text-6xl">
+              Cotizar un proyecto
+            </h2>
+            <p data-reveal="wipe" class="mt-8 max-w-md text-sm leading-relaxed text-gray-400">
+              Cada cotización parte de un archivo o de una idea. Esto es lo que necesitamos recibir según la división.
+            </p>
+          </div>
+          <dl data-reveal="wipe" class="col-span-12 self-end text-xs uppercase tracking-widest lg:col-span-4">
+            <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+              <dt class="text-blue-500">01</dt>
+              <dd class="col-span-2 text-gray-100">Estudio DICOM</dd>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+              <dt class="text-blue-500">02</dt>
+              <dd class="col-span-2 text-gray-100">Idea o requerimiento</dd>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-gray-800 py-4">
+              <dt class="text-blue-500">03</dt>
+              <dd class="col-span-2 text-gray-100">Identidad corporativa</dd>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-y border-gray-800 py-4">
+              <dt class="text-gray-400">Canal</dt>
+              <dd class="col-span-2 text-gray-400">Pendiente de publicar</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-gray-800 bg-gray-950">
+    <div class="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-8 px-6 py-12 text-xs uppercase tracking-widest text-gray-400">
+      <p class="col-span-12 text-gray-100 lg:col-span-2">Agathus Labs</p>
+      <p class="col-span-12 mt-2 lg:col-span-6 lg:mt-0">Precisión digital. Manufactura real.</p>
+      <p class="col-span-12 mt-2 lg:col-span-4 lg:mt-0 lg:text-right">&copy; 2026 Agathus Corp. / Arequipa, Perú.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Reveal: once the DOM is ready, mark [data-reveal] elements with
+    // data-visible as they enter the viewport. Elements entering in the same
+    // batch are staggered by 75ms.
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        var i = 0;
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.style.setProperty('--d', Math.min(i++, 6) * 75 + 'ms');
+          entry.target.setAttribute('data-visible', '');
+          io.unobserve(entry.target);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+      document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+    });
+  </script>
+
+</body>
+</html>
